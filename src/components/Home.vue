@@ -10,7 +10,9 @@ export default {
         logout() {
             window.sessionStorage.removeItem("token")
             this.$router.push('/login')
+            console.log();
         }
+        
     }
 }
 </script>
