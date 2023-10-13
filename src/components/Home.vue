@@ -21,6 +21,7 @@
             :unique-opened="true"
             :collapse="isCollapse"
             :collapse-transition="false"
+            router
         >
           <!-- 一级菜单 -->
           <el-submenu v-for="item in menuList" :key="item.id" :index="item.id.toString()">
@@ -32,7 +33,7 @@
               <span>{{ item.authName }}</span>
             </template>
             <!-- 二级菜单 -->
-            <el-menu-item v-for="subItem in item.children" :key="subItem.id" :index="subItem.id.toString()">
+            <el-menu-item v-for="subItem in item.children" :key="subItem.id" :index="'/'+subItem.path">
               <template slot="title">
                 <!-- 图标 -->
                 <i class="el-icon-menu"></i>
@@ -44,7 +45,9 @@
         </el-menu>
       </el-aside>
       <!-- 右侧内容主体 -->
-      <el-main><router-view></router-view></el-main>
+      <el-main>
+        <router-view></router-view>
+      </el-main>
     </el-container>
   </el-container>
 </template>
@@ -75,7 +78,7 @@ export default {
       this.menuList = result.data
     },
     // 点击按钮切换标签折叠或展开
-    toggleCollapse(){
+    toggleCollapse() {
       this.isCollapse = !this.isCollapse
     }
   },
@@ -109,7 +112,7 @@ export default {
   background-color: #333744;
 }
 
-.el-menu{
+.el-menu {
   border: 0
 }
 
@@ -125,7 +128,7 @@ export default {
   margin-right: 10px;
 }
 
-.toggle-button{
+.toggle-button {
   background-color: #4A5064;
   color: #fff;
   text-align: center;
