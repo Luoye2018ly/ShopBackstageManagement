@@ -9,7 +9,7 @@
     <!-- 卡片视图 -->
     <el-card>
       <!-- 搜索与添加区域 -->
-      <el-row>
+      <el-row :gutter="20">
         <el-col :span="6">
           <el-input placeholder="请输入内容">
             <el-button slot="append" icon="el-icon-search"></el-button>
@@ -24,7 +24,31 @@
 </template>
 
 <script>
-
+export default {
+  data() {
+    return {
+    // 获取用户数据列表的参数对象
+      queryInfo:{
+        query: '',
+        pagenum: 1,
+        pagesize: 2
+      },
+      userList:[],
+      total:0
+    }
+  },
+  created() {
+    this.getUserList()
+  },
+  methods: {
+    async getUserList(){
+      const {data : result} = await this.$http.get('users',{ params: this.queryInfo })
+      if (result.meta.status !== 200) {return this.$message.error('Failed to get user list')}
+      this.userList = result.data.users
+      this.total = result.data.total
+    }
+  }
+}
 </script>
 
 <style scoped>
