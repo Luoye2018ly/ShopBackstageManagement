@@ -19,11 +19,9 @@ const router = new Router({
                 { path:'/welcome', component: Welcome },
                 { path:'/users', component: Users }
             ]
-        },
-
+        }
     ]
 })
-
 router.beforeEach(
     (to, from, next) => {
         if (to.path === '/login') { return next() }
@@ -32,5 +30,4 @@ router.beforeEach(
         next()
     }
 )
-
 export default router

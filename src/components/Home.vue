@@ -71,7 +71,7 @@ export default {
         '145': 'iconfont icon-baobiao',
       },
       isCollapse: false,
-      activePath:''
+      activePath: ''
     }
   },
   methods: {
@@ -88,8 +88,8 @@ export default {
     toggleCollapse() {
       this.isCollapse = !this.isCollapse
     },
-    saveNavState(activePath){
-      window.sessionStorage.setItem('activePath',activePath)
+    saveNavState(activePath) {
+      window.sessionStorage.setItem('activePath', activePath)
       this.activePath = activePath
     }
   },
