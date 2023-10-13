@@ -33,7 +33,7 @@ export default {
         username: 'admin',
         password: '123456'
       },
-      // elementui表单验证规则对象
+      // element-ui表单验证规则对象
       loginFormRules: {
         username: [
           {required: true, message: "请输入用户名", trigger: "blur"},
@@ -58,7 +58,7 @@ export default {
         this.$message.success("Welcome")
         // 将登录成功后的token添加至sessionStorage中
         window.sessionStorage.setItem("token", result.data.token)
-        this.$router.push('/home')
+        await this.$router.push('/home')
       })
     }
   }
