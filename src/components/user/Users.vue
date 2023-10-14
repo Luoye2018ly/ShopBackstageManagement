@@ -13,7 +13,7 @@
         <el-col :span="6">
           <el-input placeholder="请输入内容">
             <!-- slot被弃用，使用具名插槽指定插槽名时可以使用v-slot:"slotName"进行指定，可以简写成#slotName -->
-            <template  #append>
+            <template #append>
               <el-button icon="el-icon-search"></el-button>
             </template>
           </el-input>
