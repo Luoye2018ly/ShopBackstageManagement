@@ -12,7 +12,10 @@
       <el-row :gutter="20">
         <el-col :span="6">
           <el-input placeholder="请输入内容">
-            <el-button slot="append" icon="el-icon-search"></el-button>
+            <!-- slot被弃用，使用具名插槽指定插槽名时可以使用v-slot:"slotName"进行指定，可以简写成#slotName -->
+            <template  #append>
+              <el-button icon="el-icon-search"></el-button>
+            </template>
           </el-input>
         </el-col>
         <el-col :span="4">
@@ -25,8 +28,14 @@
         <el-table-column label="邮箱" prop="email"></el-table-column>
         <el-table-column label="电话" prop="mobile"></el-table-column>
         <el-table-column label="角色" prop="role_name"></el-table-column>
-        <el-table-column label="状态" prop=""></el-table-column>
-        <el-table-column label="操作"></el-table-column>
+        <el-table-column label="状态">
+          <template v-slot="scope">
+            <el-switch v-model="scope.row.mg_state"></el-switch>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作">
+
+        </el-table-column>
       </el-table>
     </el-card>
   </div>
@@ -36,23 +45,25 @@
 export default {
   data() {
     return {
-    // 获取用户数据列表的参数对象
-      queryInfo:{
+      // 获取用户数据列表的参数对象
+      queryInfo: {
         query: '',
         pagenum: 1,
         pagesize: 2
       },
-      userList:[],
-      total:0
+      userList: [],
+      total: 0
     }
   },
   created() {
     this.getUserList()
   },
   methods: {
-    async getUserList(){
-      const {data : result} = await this.$http.get('users',{ params: this.queryInfo })
-      if (result.meta.status !== 200) {return this.$message.error('Failed to get user list')}
+    async getUserList() {
+      const {data: result} = await this.$http.get('users', {params: this.queryInfo})
+      if (result.meta.status !== 200) {
+        return this.$message.error('Failed to get user list')
+      }
       this.userList = result.data.users
       this.total = result.data.total
     }

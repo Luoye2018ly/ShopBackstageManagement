@@ -8,6 +8,7 @@ import './assets/fonts/iconfont.css'
 import axios from 'axios';
 axios.defaults.baseURL = "http://127.0.0.1:8888/api/private/v1/"
 
+
 Vue.config.productionTip = false
 Vue.use(ElementUI)
 axios.interceptors.request.use(config =>{
