@@ -27,7 +27,7 @@
           <!-- 一级菜单 -->
           <el-submenu v-for="item in menuList" :key="item.id" :index="item.id.toString()">
             <!-- 一级菜单模板区域 -->
-            <template slot="title">
+            <template #title>
               <!-- 图标 -->
               <i :class="iconsObj[item.id]"></i>
               <!-- 文本 -->
@@ -38,9 +38,9 @@
                 v-for="subItem in item.children"
                 :key="subItem.id"
                 :index="'/'+subItem.path"
-                @click="saveNavState('/'+subItem.path)"
+                @click="saveNavState(`/${subItem.path}`)"
             >
-              <template slot="title">
+              <template #title>
                 <!-- 图标 -->
                 <i class="el-icon-menu"></i>
                 <!-- 文本 -->

@@ -36,12 +36,12 @@ export default {
       // element-ui表单验证规则对象
       loginFormRules: {
         username: [
-          {required: true, message: "请输入用户名", trigger: "blur"},
-          {min: 3, max: 10, message: "长度在3到10个字符", trigger: "blur"}
+          {required: true, message: "Please enter username", trigger: "blur"},
+          {min: 3, max: 10, message: "Please limit the length from 3 to 10 characters ", trigger: "blur"}
         ],
         password: [
-          {required: true, message: "请输入密码", trigger: "blur"},
-          {min: 6, max: 16, message: "长度在6到16个字符", trigger: "blur"}
+          {required: true, message: "Please enter username", trigger: "blur"},
+          {min: 6, max: 16, message: "Please limit the length from 6 to 16 characters", trigger: "blur"}
         ]
       }
     }

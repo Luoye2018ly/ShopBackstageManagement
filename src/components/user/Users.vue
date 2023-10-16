@@ -11,10 +11,11 @@
       <!-- 搜索与添加区域 -->
       <el-row :gutter="20">
         <el-col :span="6">
-          <el-input placeholder="请输入内容">
+          <el-input placeholder="Please enter content" v-model="queryInfo.query" @keyup.enter.native="getUserList"
+                    @clear="getUserList" clearable>
             <!-- slot被弃用，使用具名插槽指定插槽名时可以使用v-slot:"slotName"进行指定，可以简写成#slotName -->
             <template #append>
-              <el-button icon="el-icon-search"></el-button>
+              <el-button icon="el-icon-search" @click="getUserList"></el-button>
             </template>
           </el-input>
         </el-col>
@@ -36,8 +37,14 @@
             </template>
           -->
           <!-- 做了二次解构赋值，先从对象中将row解构出来，再从row中将mg_state解构出来 -->
-          <template v-slot="{row:{mg_state}}">
-            <el-switch v-model="mg_state"></el-switch>
+          <!-- 写到后面需要el-switch绑定@change事件，该事件需要用到触发事件的开关的id，于是只能被迫只将row解构出来，不做二次解构赋值 -->
+          <!--
+            <template v-slot="{row:{mg_state}">
+              <el-switch v-model="mg_state"></el-switch>
+            </template>
+          -->
+          <template v-slot="{row}">
+            <el-switch v-model="row.mg_state" @change="userStateChanged(row)"></el-switch>
           </template>
         </el-table-column>
         <el-table-column label="操作" width="180px">
@@ -93,18 +100,29 @@ export default {
     async getUserList() {
       const {data: result} = await this.$http.get('users', {params: this.queryInfo})
       if (result.meta.status !== 200) {
-        return this.$message.error('Failed to get user list')
+        return this.$message.error('Failed to get userList')
       }
       this.userList = result.data.users
       this.total = result.data.total
     },
     // 监听 pageSize 改变的事件
-    handleSizeChange(newSize){
+    handleSizeChange(newSize) {
       this.queryInfo.pagesize = newSize
+      this.getUserList()
     },
     // 监听 页码值 改变的事件
-    handleCurrentChange(newPage){
-      console.log(newPage)
+    handleCurrentChange(newPage) {
+      this.queryInfo.pagenum = newPage
+      this.getUserList()
+    },
+    // 监听switch开关状态的改变
+    async userStateChanged(userInfo) {
+      const {data: result} = await this.$http.put(`users/${userInfo.id}/state/${userInfo.mg_state}`)
+      if (result.meta.status !== 200) {
+        userInfo.mg_state = !userInfo.mg_state
+        return this.$message.error('Failed to change userStatus!')
+      }
+      this.$message.success('Change userStatus successfully！')
     }
   }
 }
