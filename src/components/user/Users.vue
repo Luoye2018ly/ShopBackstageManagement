@@ -11,8 +11,8 @@
       <!-- 搜索与添加区域 -->
       <el-row :gutter="20">
         <el-col :span="6">
-          <el-input placeholder="Please enter content" v-model="queryInfo.query" @keyup.enter.native="getUserList"
-                    @clear="getUserList" clearable>
+          <el-input v-model="queryInfo.query" clearable placeholder="Please enter content"
+                    @clear="getUserList" @keyup.enter.native="getUserList">
             <!-- slot被弃用，使用具名插槽指定插槽名时可以使用v-slot:"slotName"进行指定，可以简写成#slotName -->
             <template #append>
               <el-button icon="el-icon-search" @click="getUserList"></el-button>
@@ -20,7 +20,7 @@
           </el-input>
         </el-col>
         <el-col :span="4">
-          <el-button type="primary">添加用户</el-button>
+          <el-button type="primary" @click="addDialogVisible = true">添加用户</el-button>
         </el-col>
       </el-row>
       <!-- 用户列表区 -->
@@ -50,30 +50,52 @@
         <el-table-column label="操作" width="180px">
           <template v-slot="scope">
             <!-- 修改按钮 -->
-            <el-tooltip effect="dark" content="修改角色" placement="top" :enterable="false">
-              <el-button type="primary" icon="el-icon-edit" size="mini"></el-button>
+            <el-tooltip :enterable="false" content="修改角色" effect="dark" placement="top">
+              <el-button icon="el-icon-edit" size="mini" type="primary"></el-button>
             </el-tooltip>
             <!-- 删除按钮 -->
-            <el-tooltip effect="dark" content="删除角色" placement="top" :enterable="false">
-              <el-button type="danger" icon="el-icon-delete" size="mini"></el-button>
+            <el-tooltip :enterable="false" content="删除角色" effect="dark" placement="top">
+              <el-button icon="el-icon-delete" size="mini" type="danger"></el-button>
             </el-tooltip>
             <!-- 分配角色按钮 -->
-            <el-tooltip effect="dark" content="分配角色" placement="top" :enterable="false">
-              <el-button type="warning" icon="el-icon-setting" size="mini"></el-button>
+            <el-tooltip :enterable="false" content="分配角色" effect="dark" placement="top">
+              <el-button icon="el-icon-setting" size="mini" type="warning"></el-button>
             </el-tooltip>
           </template>
         </el-table-column>
       </el-table>
       <el-pagination
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
           :current-page="queryInfo.pagenum"
-          :page-sizes="[1, 2, 5, 10]"
           :page-size="queryInfo.pagesize"
+          :page-sizes="[1, 2, 5, 10]"
+          :total="total"
           layout="total, sizes, prev, pager, next, jumper"
-          :total="total">
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange">
       </el-pagination>
     </el-card>
+    <el-dialog
+        :visible.sync="addDialogVisible"
+        title="Add Users"
+        width="30%">
+      <!-- 内容主体区 -->
+      <el-form ref="addFormRef" :model="addForm" :rules="addFormRules" label-width="70px">
+        <el-form-item label="用户名" prop="username">
+          <el-input v-model="addForm.username"></el-input>
+        </el-form-item><el-form-item label="密码" prop="password">
+          <el-input v-model="addForm.password"></el-input>
+        </el-form-item><el-form-item label="邮箱" prop="email">
+          <el-input v-model="addForm.email"></el-input>
+        </el-form-item><el-form-item label="手机" prop="mobile">
+          <el-input v-model="addForm.mobile"></el-input>
+        </el-form-item>
+      </el-form>
+      <!-- 底部区域 -->
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="addDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="addDialogVisible = false">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -90,7 +112,25 @@ export default {
         pagesize: 2
       },
       userList: [],
-      total: 0
+      total: 0,
+      // 控制添加用户对话框的显示或隐藏
+      addDialogVisible: false,
+      addForm: {
+        username:"",
+        password:"",
+        email:"",
+        mobile:""
+      },
+      // 添加表单的验证规则对象
+      addFormRules: {
+        username: [{required: true, message: "Please enter username", trigger: "blur"},
+                   {min: 3, max: 10, message: "Please limit the length from 3 to 10 characters", trigger: "blur"}],
+        password: [{required: true, message: "Please enter password", trigger: "blur"},
+                   {min: 6, max: 15, message: "Please limit the length from 6 to 15 characters", trigger: "blur"}],
+        email: [{required: true, message:"Please enter email"}],
+        mobile:[{required:true,message:"Please enter mobile phone number"}]
+      }
+
     }
   },
   created() {

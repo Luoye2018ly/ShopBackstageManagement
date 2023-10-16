@@ -41,7 +41,7 @@ export default {
         ],
         password: [
           {required: true, message: "Please enter username", trigger: "blur"},
-          {min: 6, max: 16, message: "Please limit the length from 6 to 16 characters", trigger: "blur"}
+          {min: 6, max: 15, message: "Please limit the length from 6 to 15 characters", trigger: "blur"}
         ]
       }
     }
