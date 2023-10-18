@@ -51,7 +51,7 @@
           <template v-slot="scope">
             <!-- 修改按钮 -->
             <el-tooltip :enterable="false" content="修改角色" effect="dark" placement="top">
-              <el-button icon="el-icon-edit" size="mini" type="primary"></el-button>
+              <el-button icon="el-icon-edit" size="mini" type="primary" @click="showEditDialog(scope.row.id)"></el-button>
             </el-tooltip>
             <!-- 删除按钮 -->
             <el-tooltip :enterable="false" content="删除角色" effect="dark" placement="top">
@@ -101,6 +101,17 @@
         <el-button type="primary" @click="addUser">确 定</el-button>
       </span>
     </el-dialog>
+    <!-- 修改用户对话框 -->
+    <el-dialog
+        :visible.sync="editDialogVisible"
+        title="修改用户"
+        width="30%">
+      <span>这是一段信息</span>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="editDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="editDialogVisible = false">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -108,16 +119,16 @@
 export default {
   data() {
     // 验证邮箱规则
-    let checkEmail = (rules,value,callback) => {
+    let checkEmail = (rules, value, callback) => {
       // 验证邮箱正则
       const regEmail = /^([a-zA-z0-9_-])+@([a-zA-Z0-9_-])+(\.[a-zA-Z0-9_-])+/
-      if (regEmail.test(value)){
+      if (regEmail.test(value)) {
         return callback()
       }
       callback(new Error("Please enter correct email"))
     }
     // 验证手机号规则
-    let checkMobile = (rules,value,callback) => {
+    let checkMobile = (rules, value, callback) => {
       // 验证手机号正则
       const regMobile = /^(0|86|17951)?(13[0-9]|15[0-9]|17[678]|18[0-9]|14[57])[0-9]{8}$/
       if (regMobile.test(value)) {
@@ -151,10 +162,12 @@ export default {
         password: [{required: true, message: "Please enter password", trigger: "blur"},
           {min: 6, max: 15, message: "Please limit the length from 6 to 15 characters", trigger: "blur"}],
         email: [{required: true, message: "Please enter email", trigger: "blur"},
-                {validator: checkEmail,trigger: "blur"}],
+          {validator: checkEmail, trigger: "blur"}],
         mobile: [{required: true, message: "Please enter mobile phone number", trigger: "blur"},
-                 {validator: checkMobile,trigger: "blur"}]
-      }
+          {validator: checkMobile, trigger: "blur"}]
+      },
+      // 控制修改用户对话框的展示与隐藏
+      editDialogVisible:false,
 
     }
   },
@@ -190,17 +203,17 @@ export default {
       this.$message.success('Change userStatus successfully！')
     },
     // 监听添加用户对话框关闭的事件
-    addDialogClosed(){
+    addDialogClosed() {
       this.$refs.addFormRef.resetFields()
     },
     // 点击按钮添加新用户预校验
-    addUser(){
-      this.$refs.addFormRef.validate(async valid=>{
+    addUser() {
+      this.$refs.addFormRef.validate(async valid => {
         // 校验失败，直接返回
         if (!valid) return
         // 校验成功，提交数据
-        const {data : result } = await this.$http.post('users',this.addForm)
-        if (result.meta.status !== 201){
+        const {data: result} = await this.$http.post('users', this.addForm)
+        if (result.meta.status !== 201) {
           this.$message.error('Failed to add user')
         }
         this.$message.success('Add user successfully')
@@ -209,6 +222,14 @@ export default {
         // 重新获取用户列表
         await this.getUserList()
       })
+    },
+    // 展示编辑用户的对话框
+    async showEditDialog(id) {
+      const {data : result} = await this.$http.get(`user/${id}`)
+      if (result.meta.status !== 200){
+        return this.$message.error(`Failed to get user list`)
+      }
+      this.editDialogVisible = true
     }
   }
 }
