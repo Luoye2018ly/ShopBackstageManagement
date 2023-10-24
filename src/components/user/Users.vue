@@ -233,7 +233,6 @@ export default {
     // 监听添加用户对话框关闭的事件
     addDialogClosed() {
       this.$refs.addFormRef.resetFields()
-      console.log(this.$refs.addFormRef);
     },
     // 点击按钮添加新用户预校验
     addUser() {

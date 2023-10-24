@@ -11,7 +11,27 @@
       <!-- 添加角色按扭区 -->
       <el-row>
         <el-col>
-          <el-button type="primary">添加角色</el-button>
+          <el-button type="primary" @click="addDialogVisible = true">添加角色</el-button>
+          <el-dialog
+              :visible.sync="addDialogVisible"
+              title="addUsers"
+              width="30%"
+          >
+            <span>
+              <el-form :rules="addRolesRules" label-width="85px">
+                <el-form-item label="roleName" prop="name">
+                  <el-input v-model="addDialog.roleName"></el-input>
+                </el-form-item>
+                <el-form-item label="roleDesc">
+                  <el-input v-model="addDialog.roleDesc"></el-input>
+                </el-form-item>
+              </el-form>
+            </span>
+            <span slot="footer" class="dialog-footer">
+              <el-button @click="addDialogVisible = false">取 消</el-button>
+              <el-button type="primary" @click="postInfo">确 定</el-button>
+            </span>
+          </el-dialog>
         </el-col>
       </el-row>
       <!-- 角色列表区 -->
@@ -52,12 +72,35 @@
         <el-table-column label="角色描述" prop="roleDesc"></el-table-column>
         <el-table-column label="操作" width="280px">
           <template v-slot="{row:{id}}">
-            <el-button icon="el-table-edit" size="mini" type="primary" >编辑</el-button>
-            <el-button icon="el-icon-delete" size="mini" type="danger" @click="deleteUser(id)">删除</el-button>
+            <el-button icon="el-table-edit" size="mini" type="primary" @click="editRoles(id)">编辑</el-button>
+            <el-button icon="el-icon-delete" size="mini" type="danger" @click="removeRoles(id)">删除</el-button>
             <el-button icon="el-icon-setting" size="mini" type="warning">分配权限</el-button>
           </template>
         </el-table-column>
       </el-table>
+      <el-dialog
+          :visible.sync="editDialogVisible"
+          title="提示"
+          width="30%"
+      >
+        <span>
+          <el-form>
+            <el-form-item label="roleId">
+              <el-input v-model="editDialog.roleId"></el-input>
+            </el-form-item>
+            <el-form-item label="roleName">
+              <el-input v-model="editDialog.roleName"></el-input>
+            </el-form-item>
+            <el-form-item label="roleId">
+              <el-input v-model="editDialog.roleDesc"></el-input>
+            </el-form-item>
+          </el-form>
+        </span>
+        <span slot="footer" class="dialog-footer">
+          <el-button @click="editDialogVisible = false">取 消</el-button>
+          <el-button type="primary" @click="postInfoByID(editDialog.roleId)">确 定</el-button>
+        </span>
+      </el-dialog>
     </el-card>
   </div>
 </template>
@@ -66,7 +109,23 @@
 export default {
   data() {
     return {
-      roleList: []
+      roleList: [],
+      editDialogVisible: false,
+      editDialog: {
+        roleId: "",
+        roleName: "",
+        roleDesc: ""
+      },
+      addDialogVisible: false,
+      addDialog: {
+        roleName: "",
+        roleDesc: ""
+      },
+      addRolesRules: {
+        name: [
+          {required: true, message: "Please enter roleName", trigger: "blur"}
+        ]
+      }
     }
   },
   created() {
@@ -76,23 +135,57 @@ export default {
     async getRolesList() {
       const {data: result} = await this.$http.get('roles')
       if (result.meta.status !== 200) {
-        return this.$message.error("Failed to get roles list!")
+        return this.$message.error("Failed to get roles list")
       }
       this.roleList = result.data
     },
-    async deleteUser(id){
+    async removeRoles(id) {
       const confirmResult = await this.$confirm('此操作将永久删除该角色, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).catch(err => err)
-      if (confirmResult !== "confirm") {return this.$message.info("Removal has been canceled")}
-      const {data : result} = await this.$http.delete(`roles/${id}`)
-      if (result.meta.status !== 200){
-        return this.$message.error('Failed to remove roles!')
+      if (confirmResult !== "confirm") {
+        return this.$message.info("Removal has been canceled")
+      }
+      const {data: result} = await this.$http.delete(`roles/${id}`)
+      if (result.meta.status !== 200) {
+        return this.$message.error('Failed to remove roles')
       }
       await this.getRolesList()
       return this.$message.success('Remove roles successfully!')
+    },
+    async editRoles(id) {
+      this.editDialogVisible = true
+      await this.getRolesListByID(id)
+    },
+    async getRolesListByID(id) {
+      const {data: result} = await this.$http.get(`roles/${id}`)
+      if (result.meta.status !== 200) {
+        return this.$message.error(`Failed to get roles list by id`)
+      }
+      this.editDialog.roleId = result.data.roleId
+      this.editDialog.roleName = result.data.roleName
+      this.editDialog.roleDesc = result.data.roleDesc
+    },
+    async postInfoByID(id) {
+      const {data: result} = await this.$http.put(`roles/${id}`, this.editDialog)
+      if (result.meta.status !== 200) {
+        return this.$message('Failed to post data')
+      }
+      this.editDialogVisible = false
+      await this.getRolesList()
+      return this.$message.success('Change the roles list successfully!')
+    },
+    async postInfo() {
+      const {data: result} = await this.$http.post(`roles`, this.addDialog)
+      console.log(result)
+      if (result.meta.status !== 201) {
+        return this.$message.error('Failed to post data')
+      }
+      this.addDialogVisible = false
+      await this.getRolesList()
+      return this.$message.success('Add roles list successfully!')
     }
 
   }
