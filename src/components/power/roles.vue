@@ -38,13 +38,15 @@
       <el-table :data="roleList" border stripe>
         <!-- 展开列 -->
         <el-table-column type="expand">
-          <template v-slot="{row:{children}}">
-            <el-row v-for="(item1,index1) in children" :key="item1.id"
+          <template v-slot="{row}">
+            <el-row v-for="(item1,index1) in row.children" :key="item1.id"
                     :class="['bdBtm',index1 === 0 ? 'bdTop' : '' ,'vcenter']"
                     :span="5">
               <!-- 渲染一级权限 -->
               <el-col :span="5">
-                <el-tag>{{ item1.authName }}</el-tag>
+                <el-tag closable @close="removeRightsByID(row,item1.id)">
+                  {{ item1.authName }}
+                </el-tag>
                 <i class="el-icon-caret-right"></i>
               </el-col>
               <!-- 渲染二级和三级权限 -->
@@ -53,11 +55,14 @@
                 <el-row v-for="(item2,index2) in item1.children" :key="item2.id"
                         :class="[index2 === 0 ? '' : 'bdTop','vcenter']">
                   <el-col :span="6">
-                    <el-tag type="success">{{ item2.authName }}</el-tag>
+                    <el-tag closable type="success" @close="removeRightsByID(row,item2.id)">
+                      {{ item2.authName }}
+                    </el-tag>
                     <i class="el-icon-caret-right"></i>
                   </el-col>
                   <el-col :span="18">
-                    <el-tag v-for="(item3,index3) in item2.children" :key="item3.id" type="warning">
+                    <el-tag v-for="(item3,index3) in item2.children" :key="item3.id" closable type="warning"
+                            @close="removeRightsByID(row,item3.id)">
                       {{ item3.authName }}
                     </el-tag>
                   </el-col>
@@ -179,15 +184,31 @@ export default {
     },
     async postInfo() {
       const {data: result} = await this.$http.post(`roles`, this.addDialog)
-      console.log(result)
       if (result.meta.status !== 201) {
         return this.$message.error('Failed to post data')
       }
       this.addDialogVisible = false
       await this.getRolesList()
       return this.$message.success('Add roles list successfully!')
+    },
+    // 根据 ID 删除对应权限
+    async removeRightsByID(role, rightsID) {
+      // 弹框提示用户是否删除
+      const confirmResult = await this.$confirm('此操作将永久删除该权限, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).catch(err => err)
+      if (confirmResult !== 'confirm') {
+        return this.$message.info("Removal has been canceled")
+      }
+      const {data: result} = await this.$http.delete(`roles/${role.id}/rights/${rightsID}`)
+      if (result.meta.status !== 200) {
+        return this.$message.error("Failed to remove rights")
+      }
+      // await this.getRolesList()
+      role.children = result.data
     }
-
   }
 }
 </script>
