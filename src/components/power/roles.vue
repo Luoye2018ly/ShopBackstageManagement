@@ -18,8 +18,8 @@
               width="30%"
           >
             <span>
-              <el-form :rules="addRolesRules" label-width="85px">
-                <el-form-item label="roleName" prop="name">
+              <el-form :model="addDialog" :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
+                <el-form-item label="roleName" prop="roleName">
                   <el-input v-model="addDialog.roleName"></el-input>
                 </el-form-item>
                 <el-form-item label="roleDesc">
@@ -126,9 +126,9 @@ export default {
         roleName: "",
         roleDesc: ""
       },
-      addRolesRules: {
-        name: [
-          {required: true, message: "Please enter roleName", trigger: "blur"}
+      rules: {
+        roleName: [
+          { required: true, message: 'Please enter roleName', trigger: 'blur' }
         ]
       }
     }
