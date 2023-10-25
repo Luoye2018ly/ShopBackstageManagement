@@ -14,11 +14,11 @@
           <el-button type="primary" @click="addDialogVisible = true">添加角色</el-button>
           <el-dialog
               :visible.sync="addDialogVisible"
-              title="addUsers"
+              title="添加用户"
               width="30%"
           >
             <span>
-              <el-form :model="addDialog" :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
+              <el-form ref="ruleForm" :model="addDialog" :rules="rules" class="demo-ruleForm" label-width="100px">
                 <el-form-item label="roleName" prop="roleName">
                   <el-input v-model="addDialog.roleName"></el-input>
                 </el-form-item>
@@ -29,7 +29,7 @@
             </span>
             <span slot="footer" class="dialog-footer">
               <el-button @click="addDialogVisible = false">取 消</el-button>
-              <el-button type="primary" @click="postInfo">确 定</el-button>
+              <el-button type="primary" @click="submitInfo">确 定</el-button>
             </span>
           </el-dialog>
         </el-col>
@@ -75,17 +75,34 @@
         <el-table-column label="#" type="index"></el-table-column>
         <el-table-column label="角色名称" prop="roleName"></el-table-column>
         <el-table-column label="角色描述" prop="roleDesc"></el-table-column>
-        <el-table-column label="操作" width="280px">
-          <template v-slot="{row:{id}}">
-            <el-button icon="el-table-edit" size="mini" type="primary" @click="editRoles(id)">编辑</el-button>
-            <el-button icon="el-icon-delete" size="mini" type="danger" @click="removeRoles(id)">删除</el-button>
-            <el-button icon="el-icon-setting" size="mini" type="warning">分配权限</el-button>
+        <el-table-column label="操作" width="290px">
+          <template v-slot="{row}">
+            <el-button icon="el-icon-edit" size="mini" type="primary" @click="editRoles(row.id)">编辑</el-button>
+            <el-button icon="el-icon-delete" size="mini" type="danger" @click="removeRoles(row.id)">删除</el-button>
+            <el-button icon="el-icon-setting" size="mini" type="warning" @click="showSetRightDialog(row)">
+              分配权限
+            </el-button>
+            <!-- 分配权限对话框 -->
+            <el-dialog
+                :visible.sync="setRightsDialogVisible"
+                title="分配权限"
+                width="30%"
+                @close="setRightsDialogClosed"
+            >
+              <!-- 树形控件 -->
+              <el-tree :data="rightsList" :default-checked-keys="defKeys" :props="treeProps" default-expand-all node-key="id"
+                       show-checkbox ref="treeRef"></el-tree>
+              <span slot="footer" class="dialog-footer">
+                <el-button @click="setRightsDialogVisible = false">取 消</el-button>
+                <el-button type="primary" @click="allotRights">确 定</el-button>
+              </span>
+            </el-dialog>
           </template>
         </el-table-column>
       </el-table>
       <el-dialog
           :visible.sync="editDialogVisible"
-          title="提示"
+          title="编辑"
           width="30%"
       >
         <span>
@@ -103,7 +120,7 @@
         </span>
         <span slot="footer" class="dialog-footer">
           <el-button @click="editDialogVisible = false">取 消</el-button>
-          <el-button type="primary" @click="postInfoByID(editDialog.roleId)">确 定</el-button>
+          <el-button type="primary" @click="submitInfoByID(editDialog.roleId)">确 定</el-button>
         </span>
       </el-dialog>
     </el-card>
@@ -128,9 +145,20 @@ export default {
       },
       rules: {
         roleName: [
-          { required: true, message: 'Please enter roleName', trigger: 'blur' }
+          {required: true, message: 'Please enter roleName', trigger: 'blur'}
         ]
-      }
+      },
+      setRightsDialogVisible: false,
+      rightsList: [],
+      // 树形结构的属性绑定对象
+      treeProps: {
+        children: "children",
+        label: "authName"
+      },
+      // 默认选中节点的ID值
+      defKeys: [],
+      // 当前即将分配权限的角色id
+      roleId:""
     }
   },
   created() {
@@ -145,7 +173,7 @@ export default {
       this.roleList = result.data
     },
     async removeRoles(id) {
-      const confirmResult = await this.$confirm('此操作将永久删除该角色, 是否继续?', '提示', {
+      const confirmResult = await this.$confirm('此操作将永久删除该角色, 是否继续?', '删除', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
@@ -173,7 +201,7 @@ export default {
       this.editDialog.roleName = result.data.roleName
       this.editDialog.roleDesc = result.data.roleDesc
     },
-    async postInfoByID(id) {
+    async submitInfoByID(id) {
       const {data: result} = await this.$http.put(`roles/${id}`, this.editDialog)
       if (result.meta.status !== 200) {
         return this.$message('Failed to post data')
@@ -182,13 +210,15 @@ export default {
       await this.getRolesList()
       return this.$message.success('Change the roles list successfully!')
     },
-    async postInfo() {
+    async submitInfo() {
       const {data: result} = await this.$http.post(`roles`, this.addDialog)
       if (result.meta.status !== 201) {
         return this.$message.error('Failed to post data')
       }
       this.addDialogVisible = false
       await this.getRolesList()
+      this.addDialog.roleDesc = ""
+      this.addDialog.roleName = ""
       return this.$message.success('Add roles list successfully!')
     },
     // 根据 ID 删除对应权限
@@ -206,8 +236,51 @@ export default {
       if (result.meta.status !== 200) {
         return this.$message.error("Failed to remove rights")
       }
+      this.$message.success("Remove rights successfully")
       // await this.getRolesList()
       role.children = result.data
+    },
+    // 展示分配权限对话框
+    async showSetRightDialog(node) {
+      this.roleId=node.id
+      // 获取树形权限列表
+      const {data: result} = await this.$http.get('rights/tree')
+      if (result.meta.status !== 200) {
+        return this.$message.error('Failed to get rights list')
+      }
+      // 把获取到的数据保存到 data 中
+      this.rightsList = result.data
+      this.getLeafKeys(node, this.defKeys)
+      this.setRightsDialogVisible = true
+    },
+    // 通过递归获取角色下所有三级权限的ID，并保存到 defKeys 中
+    getLeafKeys(node, arr) {
+      // 如果当前 node 节点不包含children属性，则是三级节点，
+      if (!node.children) {
+        return arr.push(node.id)
+      }
+      node.children.forEach((item) => {
+        this.getLeafKeys(item, arr)
+      })
+    },
+    // 监听分配权限对话框的关闭事件
+    setRightsDialogClosed(){
+      this.defKeys=[]
+    },
+    // 点击为角色分配权限
+    async allotRights(){
+      const key = [
+        ...this.$refs.treeRef.getCheckedKeys(),
+        ...this.$refs.treeRef.getHalfCheckedKeys()
+      ]
+      const idStr = key.join(",")
+      const {data: result} = await this.$http.post(`roles/${this.roleId}/rights`,{rids:idStr})
+      if (result.meta.status !== 200){
+        return this.$message.error("Failed to assign permissions")
+      }
+      this.$message.success("Assign permissions successfully")
+      await this.getRolesList()
+      this.setRightsDialogVisible = false
     }
   }
 }
