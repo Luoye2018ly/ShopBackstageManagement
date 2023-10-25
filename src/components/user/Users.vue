@@ -111,7 +111,7 @@
         width="30%"
         @close="editDialogClosed">
       <span>
-        <el-form :model="editForm" :rules="editFormRules" ref="editFormRef" label-width="70px">
+        <el-form ref="editFormRef" :model="editForm" :rules="editFormRules" label-width="70px">
           <el-form-item label="用户名">
             <el-input v-model="editForm.username" disabled></el-input>
           </el-form-item>
@@ -126,6 +126,18 @@
       <span slot="footer" class="dialog-footer">
         <el-button @click="editDialogVisible = false">取 消</el-button>
         <el-button type="primary" @click="editUserInfo">确 定</el-button>
+      </span>
+    </el-dialog>
+    <!-- 分配角色对话框 -->
+    <el-dialog
+        :visible.sync="setRoleDialogVisible"
+        title="分配角色"
+        width="30%"
+    >
+      <span>这是一段信息</span>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="setRoleDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="setRoleDialogVisible = false">确 定</el-button>
       </span>
     </el-dialog>
   </div>
@@ -196,7 +208,8 @@ export default {
           {required: true, message: 'Please enter mobile', trigger: "blur"},
           {validator: checkMobile, trigger: "blur"}
         ]
-      }
+      },
+      setRoleDialogVisible: false
     }
   },
   created() {
@@ -286,7 +299,7 @@ export default {
       )
     },
     // 根据ID删除对应用户信息
-    async removeUserByID(id){
+    async removeUserByID(id) {
       // 弹框询问用户是否需要删除
       const confirmResult = await this.$confirm('此操作将永久删除该用户, 是否继续?', '提示', {
         confirmButtonText: '确定',
@@ -296,11 +309,11 @@ export default {
       // .catch(err => err) 等同于 .catch(err => {return err}，当箭头函数只有一行且为返回值时，可以将其简化为一行
       // 如果用户确认删除，返回值为字符串 confirm
       // 如果用户取消删除，返回值为字符串 cancel
-      if (confirmResult !== "confirm"){
+      if (confirmResult !== "confirm") {
         return this.$message.info("Removal has been canceled")
       }
-      const {data : result} = await this.$http.delete(`users/${id}`)
-      if (result.meta.status !== 200){
+      const {data: result} = await this.$http.delete(`users/${id}`)
+      if (result.meta.status !== 200) {
         return this.$message.error("Failed to remove ")
       }
       await this.getUserList()
