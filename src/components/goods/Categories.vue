@@ -21,17 +21,28 @@
 
 <script>
 export default {
-  data(){
-    return{
+  data() {
+    return {
+      // 查询条件
+      queryInfo: {
+        type: 3,
+        pagenum: 1,
+        pagesize: 5
+      },
       catelist: []
     }
   },
   created() {
     this.getCategories()
   },
-  methods:{
-    async getCategories(){
-      const {data: result} = await this.$http.get("categories")
+  methods: {
+    async getCategories() {
+      const {data: result} = await this.$http.get("categories",{params:this.queryInfo})
+      if (result.meta.status !== 200){
+        return this.$message.error("Failed to get categories")
+      }
+      console.log(result.data)
+      // this.catelist = result.data
     }
   },
 }
