@@ -6,11 +6,13 @@ import router from './router';
 import './assets/css/global.css'
 import './assets/fonts/iconfont.css'
 import axios from 'axios';
+import TreeTable from "vue-table-with-tree-grid"
 axios.defaults.baseURL = "http://127.0.0.1:8888/api/private/v1/"
 
 
 Vue.config.productionTip = false
 Vue.use(ElementUI)
+Vue.component("tree-table",TreeTable)
 axios.interceptors.request.use(config =>{
   config.headers.Authorization = window.sessionStorage.getItem('token')
   return config
