@@ -128,11 +128,13 @@
         <el-button type="primary" @click="editUserInfo">确 定</el-button>
       </span>
     </el-dialog>
+
     <!-- 分配角色对话框 -->
     <el-dialog
         :visible.sync="setRoleDialogVisible"
         title="分配角色"
         width="30%"
+        @close="setRoleDialogClosed"
     >
       <div>
         <p>当前用户：{{ userInfo.username }}</p>
@@ -362,6 +364,10 @@ export default {
       this.$message.success("Update role successful")
       await this.getUserList()
       this.setRoleDialogVisible = false
+    },
+    setRoleDialogClosed(){
+      this.selectedRoleId = ""
+      this.userInfo = ""
     }
   }
 }
