@@ -42,7 +42,6 @@ export default {
         return this.$message.error('Failed to get rights list')
       }
       this.rightsList = result.data
-      console.log(this.rightsList)
     }
   }
 }
