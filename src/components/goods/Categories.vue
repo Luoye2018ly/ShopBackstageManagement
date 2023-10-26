@@ -37,11 +37,28 @@
           <el-tag v-else size="mini" type="warning">三级</el-tag>
         </template>
         <!-- 操作 -->
-        <template #opt="{row}">
-          <el-button icon="el-icon-edit" size="mini" type="primary">编辑</el-button>
-          <el-button icon="el-icon-delete" size="mini" type="danger">删除</el-button>
+        <template #opt="{row:{cat_id: id}}">
+          <el-button icon="el-icon-edit" size="mini" type="primary" @click="editCategories(id)">编辑</el-button>
+          <el-button icon="el-icon-delete" size="mini" type="danger" @click="removeCategories(id)">删除</el-button>
         </template>
       </tree-table>
+      <!-- 编辑分类对话框 -->
+      <el-dialog
+          :visible.sync="editCateDialogVisible"
+          title="修改分类"
+          width="30%"
+          @close="editCateDialogClosed"
+      >
+        <el-form ref="editDialogFormRef" :model="editCatForm">
+          <el-form-item label="分类名称" label-width="70px">
+            <el-input v-model="editCatForm.cat_name"></el-input>
+          </el-form-item>
+        </el-form>
+        <span slot="footer" class="dialog-footer">
+          <el-button @click="editCateDialogVisible = false">取 消</el-button>
+          <el-button type="primary" @click="submitEditCatForm">确 定</el-button>
+        </span>
+      </el-dialog>
       <el-pagination
           :current-page="queryInfo.pagenum"
           :page-size="queryInfo.pagesize"
@@ -130,6 +147,13 @@ export default {
         // 分类等级，默认添加一级分类
         cat_level: 0
       },
+      // 编辑分类的数据表单对象
+      editCatForm: {
+        cat_name: "",
+        cat_id: 0,
+        cat_pid: 0,
+        cat_level: 0
+      },
       // 添加分类表单的验证规则对象
       addCateFormRules: {
         cat_name: [
@@ -147,7 +171,8 @@ export default {
         checkStrictly: true
       },
       // 选中的父级分类的id数组
-      selectedKeys: []
+      selectedKeys: [],
+      editCateDialogVisible: false
     }
   },
   created() {
@@ -200,23 +225,62 @@ export default {
       }
     },
     // 点击按钮添加新分类
-    addCat(){
-      this.$refs.addCatFormRef.validate(async (valid)=>{
+    addCat() {
+      this.$refs.addCatFormRef.validate(async (valid) => {
         if (!valid) return
-        const {data: result} = await this.$http.post('categories',this.addCatForm)
-        if (result.meta.status !== 201){
-          return this.$message.error("Failed to add categories")
+        const {data: result} = await this.$http.post('categories', this.addCatForm)
+        if (result.meta.status !== 201) {
+          return this.$message.error("Failed to add category")
         }
-        this.$message.success("Add categories successfully")
+        this.$message.success("Add category successfully")
         await this.getCategories()
         this.addCatDialogVisible = false
       })
     },
-    addCateDialogClosed(){
+    addCateDialogClosed() {
       this.$refs.addCatFormRef.resetFields()
       this.selectedKeys = []
-      this.addCatForm.cat_level = 0
-      this.addCatForm.cat_pid = 0
+          // this.addCatForm.cat_level = 0
+          // this.addCatForm.cat_pid = 0
+          [this.addCatForm.cat_level, this.addCatForm.cat_pid] = [0, 0]
+    },
+    // 编辑按钮单击响应函数
+    async editCategories(id) {
+      const {data: result} = await this.$http.get(`categories/${id}`)
+      if (result.meta.status !== 200) {
+        return this.$message.error("Failed to get category by id")
+      }
+      this.editCatForm = result.data
+      console.log(this.editCatForm)
+      this.editCateDialogVisible = true
+    },
+    editCateDialogClosed() {
+      this.$refs.editDialogFormRef.resetFields()
+    },
+    async submitEditCatForm() {
+      const {data: result} = await this.$http.put(`categories/${this.editCatForm.cat_id}`, {cat_name: this.editCatForm.cat_name})
+      if (result.meta.status !== 200){
+        return this.$message.error("Failed to update category")
+      }
+      this.$message.success("Update categories successfully")
+      await this.getCategories()
+      this.editCateDialogVisible = false
+    },
+    removeCategories(id){
+      this.$confirm('此操作将永久删除该分类, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async () => {
+        const {data: result} = await this.$http.delete(`categories/${id}`)
+        if (result.meta.status !== 200){
+          return this.$message.error("Failed to remove category")
+        }
+        this.$message.success("Remove category successfully")
+        await this.getCategories()
+      }).catch(() => {
+        this.$message.info("已取消删除")
+      })
     }
   },
 }
