@@ -16,7 +16,7 @@
       <!-- 表格 -->
       <tree-table
           :columns="columns"
-          :data="catelist"
+          :data="cateList"
           :expand-type="false"
           :selection-type="false"
           border
@@ -113,7 +113,7 @@ export default {
         pagenum: 1,
         pagesize: 5
       },
-      catelist: [],
+      cateList: [],
       // 总数据条数
       total: 0,
       // 为table指定列的定义
@@ -186,7 +186,7 @@ export default {
       if (result.meta.status !== 200) {
         return this.$message.error("Failed to get categories")
       }
-      this.catelist = result.data.result
+      this.cateList = result.data.result
       this.total = result.data.total
     },
     // 监听 pagesize 改变

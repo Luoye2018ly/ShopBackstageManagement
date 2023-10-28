@@ -17,7 +17,7 @@
           </el-input>
         </el-col>
         <el-col :span="4">
-          <el-button type="primary">添加商品</el-button>
+          <el-button type="primary" @click="goAddPage">添加商品</el-button>
         </el-col>
       </el-row>
       <el-table :data="goodsList" border stripe>
@@ -26,14 +26,14 @@
         <el-table-column label="商品价格(元)" prop="goods_price" width="90px"></el-table-column>
         <el-table-column label="商品重量" prop="goods_weight" width="70px"></el-table-column>
         <el-table-column label="商品创建时间" prop="add_time" width="150px">
-          <template v-slot="{row}">
-            {{row.add_time | dateFormat}}
+          <template v-slot="{row:{add_time: time}}">
+            {{time | dateFormat}}
           </template>
         </el-table-column>
         <el-table-column label="操作" width="130px">
-          <template v-slot="{row}">
+          <template v-slot="{row:{goods_id:{id}}}">
             <el-button icon="el-icon-edit" size="mini" type="primary"></el-button>
-            <el-button icon="el-icon-delete" size="mini" type="danger"></el-button>
+            <el-button icon="el-icon-delete" size="mini" type="danger" @click="removeGoodsById(id)"></el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -85,6 +85,29 @@ export default {
     handleCurrentChange(newPage){
       this.queryInfo.pagenum = newPage
       this.getGoodsList()
+    },
+    removeGoodsById(id){
+      this.$confirm('此操作将永久删除该商品, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async () => {
+        const {data: result} = await this.$http.delete(`goods/${id}`)
+        if (result.meta.status !== 200) return this.$message.error("Failed to remove goods")
+        await this.getGoodsList()
+        this.$message({
+          type: 'success',
+          message: 'Remove goods successfully'
+        });
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: 'Removal has been canceled'
+        });
+      })
+    },
+    goAddPage(){
+      this.$router.push("/goods/add")
     }
   }
 }
