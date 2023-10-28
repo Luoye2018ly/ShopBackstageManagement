@@ -105,6 +105,7 @@
           :visible.sync="editDialogVisible"
           title="编辑"
           width="30%"
+          @keyup.enter.native="submitInfoByID(editDialog.roleId)"
       >
         <span>
           <el-form>

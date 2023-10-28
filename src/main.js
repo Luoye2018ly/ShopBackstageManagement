@@ -12,6 +12,16 @@ axios.defaults.baseURL = "http://127.0.0.1:8888/api/private/v1/"
 
 Vue.config.productionTip = false
 Vue.use(ElementUI)
+Vue.filter("dateFormat",function (originValue){
+  const date = new Date(originValue)
+  const year = date.getFullYear()
+  const month = (date.getMonth() + 1 + "").padStart(2,"0")
+  const day = (date.getDay() + "").padStart(2,"0")
+  const hours = (date.getHours() + "").padStart(2,"0")
+  const minute = (date.getMinutes() + "").padStart(2,"0")
+  const second = (date.getSeconds() + "").padStart(2,"0")
+  return `${year}-${month}-${day} ${hours}:${minute}:${second}`
+})
 Vue.component("tree-table",TreeTable)
 axios.interceptors.request.use(config =>{
   config.headers.Authorization = window.sessionStorage.getItem('token')

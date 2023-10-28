@@ -12,7 +12,7 @@
       <el-row :gutter="20">
         <el-col :span="6">
           <el-input v-model="queryInfo.query" clearable placeholder="Please enter content"
-                    @clear="getUserList" @keyup.enter.native="getUserList">
+                    @clear="getUserList" @keyup.native="getUserList">
             <!-- slot被弃用，使用具名插槽指定插槽名时可以使用v-slot:"slotName"进行指定，可以简写成#slotName -->
             <template #append>
               <el-button icon="el-icon-search" @click="getUserList"></el-button>
@@ -109,7 +109,8 @@
         :visible.sync="editDialogVisible"
         title="修改用户"
         width="30%"
-        @close="editDialogClosed">
+        @close="editDialogClosed"
+        @keyup.enter.native="editUserInfo">
       <span>
         <el-form ref="editFormRef" :model="editForm" :rules="editFormRules" label-width="70px">
           <el-form-item label="用户名">

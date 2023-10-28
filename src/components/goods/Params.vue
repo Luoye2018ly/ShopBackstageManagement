@@ -56,10 +56,11 @@
             <el-table-column label="#" type="index"></el-table-column>
             <el-table-column label="参数名称" prop="attr_name"></el-table-column>
             <el-table-column label="操作">
-              <template v-slot="{row}">
-                <el-button icon="el-icon-edit" size="mini" type="primary" @click="showEditDialog(row.attr_id)">编辑
+              <template v-slot="{row:{attr_id: id}}">
+                <el-button icon="el-icon-edit" size="mini" type="primary" @click="showEditDialog(id)">编辑
                 </el-button>
-                <el-button icon="el-icon-delete" size="mini" type="danger">删除</el-button>
+                <el-button icon="el-icon-delete" size="mini" type="danger" @click="removeCategories(id)">删除
+                </el-button>
               </template>
             </el-table-column>
           </el-table>
@@ -94,10 +95,11 @@
             <el-table-column label="#" type="index"></el-table-column>
             <el-table-column label="属性名称" prop="attr_name"></el-table-column>
             <el-table-column label="操作">
-              <template v-slot="{row}">
-                <el-button icon="el-icon-edit" size="mini" type="primary" @click="showEditDialog(row.attr_id)">编辑
+              <template v-slot="{row:{attr_id: id}}">
+                <el-button icon="el-icon-edit" size="mini" type="primary" @click="showEditDialog(id)">编辑
                 </el-button>
-                <el-button icon="el-icon-delete" size="mini" type="danger">删除</el-button>
+                <el-button icon="el-icon-delete" size="mini" type="danger" @click="removeCategories(id)">删除
+                </el-button>
               </template>
             </el-table-column>
           </el-table>
@@ -110,6 +112,7 @@
         :visible.sync="addDialogVisible"
         width="30%"
         @close="addDialogClosed"
+        @keyup.enter.native="addParams"
     >
       <!-- 添加参数表单 -->
       <el-form ref="addFormRef" :model="addForm" :rules="addFormRules" label-width="100px">
@@ -128,6 +131,7 @@
         :visible.sync="editDialogVisible"
         width="30%"
         @close="editDialogClosed"
+        @keyup.enter.native="editParams"
     >
       <!-- 修改参数表单 -->
       <el-form ref="editFormRef" :model="editForm" :rules="editFormRules" label-width="100px">
@@ -317,6 +321,27 @@ export default {
     handleClose(index, row) {
       row.attr_vals.splice(index, 1)
       this.saveAttrVals(row)
+    },
+    // 删除参数/是继续哦玫瑰
+    removeCategories(id) {
+      this.$confirm(`此操作将永久删除该${(this.activeName === "many") ? "参数" : "属性"}, 是否继续?`, `删除${(this.activeName === "many") ? "参数" : "属性"}`, {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async () => {
+        const {data: result} = await this.$http.delete(`categories/${this.cateId}/attributes/${id}`)
+        if (result.meta.status !== 200) return this.$message.error("Failed to remove attribute")
+        await this.getParamsData()
+        this.$message({
+          type: 'success',
+          message: 'Remove attribute successfully'
+        });
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: "Removal has been canceled"
+        });
+      });
     }
   },
   computed: {

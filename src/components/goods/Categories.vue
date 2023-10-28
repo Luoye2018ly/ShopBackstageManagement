@@ -48,6 +48,7 @@
           title="修改分类"
           width="30%"
           @close="editCateDialogClosed"
+          @keyup.enter.native="submitEditCatForm"
       >
         <el-form ref="editDialogFormRef" :model="editCatForm">
           <el-form-item label="分类名称" label-width="70px">
@@ -76,6 +77,7 @@
         title="添加分类"
         width="30%"
         @close="addCateDialogClosed"
+        @keyup.enter.native="addCat"
     >
       <!-- 添加分类的表单 -->
       <el-form ref="addCatFormRef" :model="addCatForm" :rules="addCateFormRules" label-width="100px">
@@ -259,21 +261,21 @@ export default {
     },
     async submitEditCatForm() {
       const {data: result} = await this.$http.put(`categories/${this.editCatForm.cat_id}`, {cat_name: this.editCatForm.cat_name})
-      if (result.meta.status !== 200){
+      if (result.meta.status !== 200) {
         return this.$message.error("Failed to update category")
       }
       this.$message.success("Update categories successfully")
       await this.getCategories()
       this.editCateDialogVisible = false
     },
-    removeCategories(id){
+    removeCategories(id) {
       this.$confirm('此操作将永久删除该分类, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(async () => {
         const {data: result} = await this.$http.delete(`categories/${id}`)
-        if (result.meta.status !== 200){
+        if (result.meta.status !== 200) {
           return this.$message.error("Failed to remove category")
         }
         this.$message.success("Remove category successfully")
