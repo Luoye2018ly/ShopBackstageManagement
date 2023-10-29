@@ -31,7 +31,7 @@
           </template>
         </el-table-column>
         <el-table-column label="操作" width="130px">
-          <template v-slot="{row:{goods_id:{id}}}">
+          <template v-slot="{row:{goods_id:id}}">
             <el-button icon="el-icon-edit" size="mini" type="primary"></el-button>
             <el-button icon="el-icon-delete" size="mini" type="danger" @click="removeGoodsById(id)"></el-button>
           </template>
