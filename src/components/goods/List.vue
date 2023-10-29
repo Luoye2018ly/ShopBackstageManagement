@@ -25,7 +25,7 @@
         <el-table-column label="商品名称" prop="goods_name"></el-table-column>
         <el-table-column label="商品价格(元)" prop="goods_price" width="90px"></el-table-column>
         <el-table-column label="商品重量" prop="goods_weight" width="70px"></el-table-column>
-        <el-table-column label="商品创建时间" prop="add_time" width="150px">
+        <el-table-column label="商品创建时间" width="150px">
           <template v-slot="{row:{add_time: time}}">
             {{time | dateFormat}}
           </template>
@@ -62,7 +62,8 @@ export default {
         pagesize: 10
       },
       goodsList: [],
-      total: 0
+      total: 0,
+
     }
   },
   created() {

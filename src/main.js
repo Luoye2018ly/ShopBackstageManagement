@@ -36,9 +36,9 @@ axios.interceptors.request.use(config => {
 })
 Vue.prototype.$http = axios
 // 全局引入的ElementUI，默认会为我们在原型对象中添加$message，并不需要单独添加
-// Vue.prototype.$message = ElementUI.Message
+Vue.prototype.$message = ElementUI.Message
 // 全局引入的ElementUI，与$message一样，引入时已经配置好$confirm，也不需要单独添加
-// Vue.prototype.$confirm = ElementUI.MessageBox.confirm
+Vue.prototype.$confirm = ElementUI.MessageBox.confirm
 new Vue({
     router,
     render: h => h(App),
