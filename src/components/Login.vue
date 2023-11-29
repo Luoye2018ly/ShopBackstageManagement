@@ -114,4 +114,5 @@ export default {
   bottom: 0;
   padding: 0 20px;
   box-sizing: border-box;
-}</style>
+}
+</style>

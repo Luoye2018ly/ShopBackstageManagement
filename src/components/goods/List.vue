@@ -10,7 +10,8 @@
     <el-card>
       <el-row :gutter="20">
         <el-col :span="8">
-          <el-input placeholder="请输入内容" v-model="queryInfo.query" @keyup.native="getGoodsList" clearable @clear="getGoodsList">
+          <el-input placeholder="请输入内容" v-model="queryInfo.query" @keyup.native="getGoodsList" clearable
+                    @clear="getGoodsList">
             <template #append>
               <el-button icon="el-icon-search" @click="getGoodsList"></el-button>
             </template>
@@ -25,14 +26,15 @@
         <el-table-column label="商品名称" prop="goods_name"></el-table-column>
         <el-table-column label="商品价格(元)" prop="goods_price" width="90px"></el-table-column>
         <el-table-column label="商品重量" prop="goods_weight" width="70px"></el-table-column>
+        <el-table-column label="商品数量" prop="goods_number" width="70px"></el-table-column>
         <el-table-column label="商品创建时间" width="150px">
           <template v-slot="{row:{add_time: time}}">
-            {{time | dateFormat}}
+            {{ time | dateFormat }}
           </template>
         </el-table-column>
         <el-table-column label="操作" width="130px">
           <template v-slot="{row:{goods_id:id}}">
-            <el-button icon="el-icon-edit" size="mini" type="primary"></el-button>
+            <el-button icon="el-icon-edit" size="mini" type="primary" @click="showEditGoodsDialog(id)"></el-button>
             <el-button icon="el-icon-delete" size="mini" type="danger" @click="removeGoodsById(id)"></el-button>
           </template>
         </el-table-column>
@@ -49,6 +51,29 @@
           background>
       </el-pagination>
     </el-card>
+    <el-dialog
+        title="编辑商品"
+        :visible.sync="editGoodsDialogVisible"
+        width="30%">
+      <el-form :model="editGoodsFormData" :rules="editGoodsFormRules" ref="editGoodsFormRef" @keyup.enter.native="postEditGoods">
+        <el-form-item label="商品名称" prop="goods_name">
+          <el-input v-model="editGoodsFormData.goods_name"></el-input>
+        </el-form-item>
+        <el-form-item label="商品价格" prop="goods_price">
+          <el-input v-model="editGoodsFormData.goods_price"></el-input>
+        </el-form-item>
+        <el-form-item label="商品重量" prop="goods_weight">
+          <el-input v-model="editGoodsFormData.goods_weight"></el-input>
+        </el-form-item>
+        <el-form-item label="商品数量" prop="goods_number">
+          <el-input v-model="editGoodsFormData.goods_number"></el-input>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="editGoodsDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="postEditGoods">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -63,7 +88,14 @@ export default {
       },
       goodsList: [],
       total: 0,
-
+      editGoodsDialogVisible: false,
+      editGoodsFormData: [],
+      editGoodsFormRules: {
+        goods_name: [{required: true, message: "Please enter goods name", trigger: "blur"}],
+        goods_price: [{required: true, message: "Please enter goods price", trigger: "blur"}],
+        goods_weight: [{required: true, message: "Please enter goods weight", trigger: "blur"}],
+        goods_number: [{required: true, message: "Please enter goods weight", trigger: "blur"}]
+      }
     }
   },
   created() {
@@ -79,15 +111,15 @@ export default {
       this.goodsList = result.data.goods
       this.total = result.data.total
     },
-    handleSizeChange(newSize){
+    handleSizeChange(newSize) {
       this.queryInfo.pagesize = newSize
       this.getGoodsList()
     },
-    handleCurrentChange(newPage){
+    handleCurrentChange(newPage) {
       this.queryInfo.pagenum = newPage
       this.getGoodsList()
     },
-    removeGoodsById(id){
+    removeGoodsById(id) {
       this.$confirm('此操作将永久删除该商品, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
@@ -107,8 +139,28 @@ export default {
         });
       })
     },
-    goAddPage(){
+    goAddPage() {
       this.$router.push("/goods/add")
+    },
+    showEditGoodsDialog(id) {
+      this.editGoodsDialogVisible = true
+      this.getGoodsListById(id)
+    },
+    async getGoodsListById(id) {
+      const {data: result} = await this.$http.get(`goods/${id}`)
+      if (result.meta.status !== 200) {
+        return this.$message.error("Failed to get goods list")
+      }
+      this.editGoodsFormData = result.data
+    },
+    async postEditGoods(){
+      const {data: result} = await this.$http.put(`goods/${this.editGoodsFormData.goods_id}`, this.editGoodsFormData)
+      if (result.meta.status !== 200){
+        return this.$message.error("Failed to update goods list")
+      }
+      await this.getGoodsList()
+      this.editGoodsDialogVisible = false
+      return this.$message.success("Update goods list successfully")
     }
   }
 }
