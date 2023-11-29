@@ -68,6 +68,9 @@
         <el-form-item label="商品数量" prop="goods_number">
           <el-input v-model="editGoodsFormData.goods_number"></el-input>
         </el-form-item>
+        <el-form-item label="商品数量" prop="goods_introduce">
+          <el-input v-model="editGoodsFormData.goods_introduce"></el-input>
+        </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="editGoodsDialogVisible = false">取 消</el-button>
@@ -94,7 +97,8 @@ export default {
         goods_name: [{required: true, message: "Please enter goods name", trigger: "blur"}],
         goods_price: [{required: true, message: "Please enter goods price", trigger: "blur"}],
         goods_weight: [{required: true, message: "Please enter goods weight", trigger: "blur"}],
-        goods_number: [{required: true, message: "Please enter goods weight", trigger: "blur"}]
+        goods_number: [{required: true, message: "Please enter goods number", trigger: "blur"}],
+        goods_introduce: [{required: true, message: "Please enter goods introduce", trigger: "blur"}]
       }
     }
   },

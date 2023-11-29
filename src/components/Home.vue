@@ -149,4 +149,11 @@ export default {
   letter-spacing: 0.2em;
   cursor: pointer;
 }
+
+.el-aside {
+  transition: width 0.5s;
+  -webkit-transition: width 0.5s;
+  -moz-transition: width 0.5s;
+  -o-transition: width 0.5s;
+}
 </style>
