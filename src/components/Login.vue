@@ -67,16 +67,16 @@ export default {
 
 <style scoped>
 .login_container {
-  background-image: url("../../public/login-background.jpg");
-  height: 100%;
+  background: url("https://s2.loli.net/2023/12/02/jX4rxBWpaDJVKcF.jpg") no-repeat center center fixed;
   background-size: cover;
+  height: 100%;
 }
 
 .login_box {
   width: 450px;
   height: 300px;
   background-color: #fff;
-  border-radius: 3px;
+  border-radius: 5px;
   position: absolute;
   left: 50%;
   top: 50%;
