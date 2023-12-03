@@ -52,9 +52,11 @@
       </el-aside>
       <!-- 右侧内容主体 -->
       <el-main>
-        <transition name="fade" mode="out-in">
-          <router-view></router-view>
-        </transition>
+        <div style="display: block;width: 100%;height: 100%;">
+          <transition name="el-fade-in">
+            <router-view :key="this.$route.path"></router-view>
+          </transition>
+        </div>
       </el-main>
     </el-container>
   </el-container>
@@ -64,7 +66,7 @@
 export default {
   data() {
     return {
-      show:true,
+      show: true,
       menuList: [],
       iconsObj: {
         '125': 'iconfont icon-user',
@@ -153,20 +155,38 @@ export default {
   cursor: pointer;
 }
 
+
+/* fade */
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.5s ease;
+  transition: opacity 0.28s;
 }
 
-.fade-enter-from,
-.fade-leave-to {
+.fade-enter,
+.fade-leave-active {
   opacity: 0;
 }
 
-.fade-enter-to,
-.fade-leave-from {
-  opacity: 1;
+/* fade-transform */
+.fade-transform--move,
+.fade-transform-leave-active,
+.fade-transform-enter-active {
+  transition: all .5s;
 }
 
+.fade-transform-enter {
+  opacity: 0;
+  transform: translateX(-30px);
+}
+
+.fade-transform-leave-to {
+  opacity: 0;
+  transform: translateX(30px);
+}
+
+.el-main{
+  height: 100%;
+  width: 100%;
+}
 </style>
 
